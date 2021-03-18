@@ -1,0 +1,504 @@
+/*
+Authors: Logan Gray, Zachary Johnson
+Description: the program is based off of the Atari game Breakout.
+Buttons are activated upon clicking the mouse when hovering over the button
+Controls: the primary controls are space and the movement of the mouse
+Space is used to start the game, and the center of the paddle is based on where the mouse is located
+Debug functions
+when the w key is pressed it will bring you to the win screen
+when the l key is pressed it will bring you to the lose screen
+
+Both of us contributed equally to all parts of the project, 
+Collaboration tools used were; Google Meet, Google Docs, Trello, Google hangout
+
+*/
+
+size(800,400);
+
+int NUM_ROWS = 8;
+int BRICK_TOP_OFFSET = 30;
+int BRICK_SPACING = 3;
+int NUM_BRICKS_PER_ROW = 10;
+int BRICK_HEIGHT = 10;
+int SPACE_FOR_BRICKS = width - (NUM_BRICKS_PER_ROW + 1) * BRICK_SPACING;
+int BRICK_WIDTH = SPACE_FOR_BRICKS / NUM_BRICKS_PER_ROW;//76
+
+int PADDLE_WIDTH = 80;
+int PADDLE_HEIGHT = 15;
+int PADDLE_OFFSET = 45;
+
+color blue = rgb(53,113,253);
+color black = rgb(0,0,0);
+color orange =rgb(246,162,35);
+color gray = rgb(154,154,152);
+color white= rgb(255,255,255);
+color green =rgb(133,233,1);
+color red=rgb(255,76,0);
+
+int arrayTotal = NUM_ROWS*NUM_BRICKS_PER_ROW;
+int[] blockX=new int[arrayTotal];
+int[] blockY=new int[arrayTotal];
+boolean[] liveBlocks = new boolean[arrayTotal];
+color[] blockColor= new color[arrayTotal];
+
+boolean clicked=false;
+boolean helpText=true;
+boolean debug=true;
+int page=0;
+int count=0;
+int lives = 3;
+int winCounter = arrayTotal;
+int score=0;
+
+//BALL LOCATION/MOVEMENT
+int startPageBallX=width/2;
+int startPageBallY=height/2;
+int ballX = startPageBallX;
+int ballY = startPageBallY;
+int disX = 0;
+int disY = 0;
+int startPageBallMoveX=5;//speed and direction of the balls x movement
+int startPageBallMoveY=5;//speed and direction of the balls y movement
+
+
+//sets all blocks as active at every start button press
+void resetBlockStatus(){
+    for(int i=0;i<arrayTotal;i++){
+    liveBlocks[i]=true;
+    }
+}
+resetBlockStatus();
+
+for(int i=0;i<arrayTotal;i++){
+   if(i<=arrayTotal/4){
+       blockColor[i]=red;
+   }
+   if((i>=arrayTotal/4)&& i<arrayTotal/2){
+       blockColor[i]=blue;
+   }
+   if(i>=arrayTotal/2 && i<=(arrayTotal/4)*3){
+        blockColor[i]=orange;
+   }
+   if(i>=((arrayTotal/4)*3)){
+        blockColor[i]=green;
+     }
+ }
+
+for(int i=0;i<NUM_ROWS;i++){//Creates an int array for  Block X positon and Block y position
+    
+    for(int j=0;j<NUM_BRICKS_PER_ROW;j++){
+        blockX[count]=3+((BRICK_SPACING+BRICK_WIDTH)*j);
+        
+        blockY[count]=20+((BRICK_SPACING+BRICK_HEIGHT)*i);
+        count++;
+    }
+    
+}   
+
+//Checks if block array X and Y are set properly
+//for(int i=0;i<80;i++){
+//    println("X: "+blockX[i]+", Y: "+blockY[i]);
+//}
+
+void keyPressed(){
+    int change=0;
+    if(key==' '&&helpText){ //Starting ball movement when space is pressed
+        change=(int)random(0,3);
+        if((change==1)){
+            disX=2;
+        }else{
+            disX=-2;
+        }
+        disY=2;
+        helpText=false;
+    }
+    if(key=='w'&& debug){
+        page=2;
+    }
+    if(key=='l'&&debug){
+        page =3;
+    }
+}
+
+void ball(){
+    fill(white);
+    rect(ballX-5,ballY-5,10,10);
+}
+
+void startPageBall(){
+    fill(white);
+    ellipse(startPageBallX,startPageBallY,20,20);
+}
+
+void drawPaddle(){
+    fill(white);
+    rect(mouseX-(PADDLE_WIDTH/2),height-PADDLE_OFFSET-PADDLE_HEIGHT,PADDLE_WIDTH,PADDLE_HEIGHT);
+}
+
+void startPagePaddle(){
+    fill(white);
+    rect(startPageBallX-(PADDLE_WIDTH/2),height-PADDLE_OFFSET-PADDLE_HEIGHT,PADDLE_WIDTH,PADDLE_HEIGHT);
+}
+
+void makeHeart(int x, int y){ //makes an image of a heart for the lives counter
+    //heart
+    noStroke();
+    fill(red);
+    ellipse(x-7,y,15,15);
+    ellipse(x+7,y,15,15);
+    quad(x-14,y+2,x,y+2,x,y+17,x-14,y+2);
+    quad(x+14,y+2,x,y+2,x,y+17,x+14,y+2);
+}
+
+void resetBall(){
+    if(page==1||page==2||page==3){
+        ballX = width/2;
+        ballY = height/2;
+        disX = 0;
+        disY = 0;
+        helpText=true;
+    }
+}
+
+void mousePressed(){
+    clicked=true;
+    //Start Button
+    if(page==0 && ((mouseX>=350&&mouseX<=450)&&(mouseY>=100&&mouseY<=125)) ){
+        page=1;
+        winCounter = arrayTotal;
+    }
+    //Play Again Button from Win Screen
+    if(page ==2&&((mouseX>=350&&mouseX<=500)&&(mouseY>=100&&mouseY<=125)) ){
+        resetBlockStatus();
+        resetBall();
+        winCounter = arrayTotal;
+        page =1;
+    }
+    //Play Again Button from Lose Screen
+    if(page ==3&&((mouseX>=350&&mouseX<=500)&&(mouseY>=100&&mouseY<=125)) ){
+        resetBlockStatus();
+        resetBall();
+        score=0;
+        winCounter = arrayTotal;
+        lives=3;
+        page =1;
+    }
+    //Main Menu button from Win Screen
+    if((page ==2||page ==3)&&((mouseX>=350&&mouseX<=500)&&(mouseY>=150&&mouseY<=175)) ){
+        resetBlockStatus();
+        resetBall();
+        winCounter = arrayTotal;
+        score=0;
+        page =0;
+    }
+    clicked=false;
+}
+
+void winCondition(int i){
+    if(!liveBlocks[i]){
+        winCounter--;
+    }else{
+        winCounter = arrayTotal;
+    }
+    if(winCounter == 0){
+        page = 2;
+    }
+}
+
+void loseCondition(){
+    if(lives==1){
+        page = 3;
+    }else{
+        lives--;
+        resetBall();
+    }
+}
+
+void checkBricks(){
+    for(int i = 0; i < arrayTotal;i++){
+        
+        
+        //top right corner
+        if(ballX>=blockX[i]+BRICK_WIDTH&&
+          ballX<=blockX[i]+BRICK_WIDTH+5&&
+          ballY>=blockY[i]-5&&
+          ballY<=blockY[i]&&liveBlocks[i]){
+            //println("top right corner");
+            liveBlocks[i]=false;
+            disX=-disX;
+            disY=-disY;
+            score = score + 100;
+            winCondition(i);
+        }
+        
+        //top left corner
+        if(ballX<=blockX[i]&&
+          ballX>=blockX[i]-5&&
+          ballY>=blockY[i]-5&&
+          ballY<=blockY[i]&&liveBlocks[i]){
+            //println("top left Corner");
+            liveBlocks[i]=false;
+            disX=-disX;
+            disY=-disY;
+            score = score + 100;
+            winCondition(i);
+        }
+        //bottom right corner
+        if(ballX>=blockX[i]+BRICK_WIDTH&&
+          ballX<=blockX[i]+BRICK_WIDTH+5&&
+          ballY>=blockY[i]+10&&
+          ballY<=blockY[i]+15&&liveBlocks[i]){
+            //println("bottom right corner");
+            liveBlocks[i]=false;
+            disX=-disX;
+            disY=-disY;
+            score = score + 100;
+            winCondition(i);
+        }
+        //bottom left corner
+        if(ballX<=blockX[i]&&
+          ballX>=blockX[i]-5&&
+          ballY>=blockY[i]+10&&
+          ballY<=blockY[i]+15&&liveBlocks[i]){
+            //println("bottom left corner");
+            liveBlocks[i]=false;
+            disX=-disX;
+            disY=-disY;
+            score = score + 100;
+            winCondition(i);
+        }
+        
+        //Checks the Right side of a block
+        if((ballX>=blockX[i]+BRICK_WIDTH)&& //Ball X is to the right of the right side of brick
+           (ballX>=blockX[i]+BRICK_WIDTH+5) //Ball x is not closer then 5 from the right side of brick
+          &&(ballX<=blockX[i]+BRICK_WIDTH+10)&&//Ball x is no greater then 10 from the right side of brick
+          (ballY<=blockY[i]+BRICK_HEIGHT)&&(ballY>=blockY[i])&&liveBlocks[i]){//if ball y is within height of brick
+            //println("right hit");
+            if(disX>0){
+                disX=-disX;
+            }
+            liveBlocks[i]=false;
+            score = score + 100;
+            winCondition(i);
+        }
+        //Checks the Left side of a block
+        if((ballX>=blockX[i]-10)&& //Ball x is to the left of brick by no greater then 10
+           (ballX>=blockX[i]-5) //Ball x to the left of brick is not closer then 5
+          &&(ballX<=blockX[i])&& //Ball x is to the left of  brick
+          (ballY<=blockY[i]+BRICK_HEIGHT)&&(ballY>=blockY[i])&&liveBlocks[i]){ //if ball y is within height of brick 
+            //println("left hit");
+            if(disX<0){
+                disX=-disX;
+            }
+            liveBlocks[i]=false;
+            score = score + 100;
+            winCondition(i);
+        }
+        
+        //Checks the Bottom of a block
+        if((ballY>=blockY[i]+BRICK_HEIGHT)&&//Ball Y is below bottom of brick
+          (ballY>=blockY[i]+BRICK_HEIGHT+5)//Ball y is not closer then 5 from the bottom of brick
+          &&(ballY<=blockY[i]+BRICK_HEIGHT+10)&&//Ball y is no greater then 10 below bottom of brick
+          (ballX>=blockX[i]&&ballX<=blockX[i]+BRICK_WIDTH)&&liveBlocks[i]){// if ball x is within block width 
+            //println("Bottom Hit");
+            if(disY<0){
+                disY=-disY;
+            }
+            liveBlocks[i]=false;
+            score = score + 100;
+            winCondition(i);
+        }
+        
+        //Checks the Top of a block
+        if((ballY<=blockY[i])&&//Ball Y is above top of brick
+          (ballY<=blockY[i]-5)//Ball y is not closer then 5 from the top of brick
+          &&(ballY>=blockY[i]-10)&&//Ball y is no greater then 10 above top of brick
+          (ballX>=blockX[i]&&ballX<=blockX[i]+BRICK_WIDTH)&&liveBlocks[i]){// if ball x is within block width 
+            //println("Top hit");
+            if(disY>0){
+                disY=-disY;
+            }
+            liveBlocks[i]=false;
+            score = score + 100;
+            winCondition(i);
+        }
+    }
+}
+
+void makeRows(){        //Draws the Bricks on the screen when called
+    for(int i=0;i<80;i++){
+        fill(blockColor[i]);
+        if(liveBlocks[i]==true){ 
+            rect(blockX[i],blockY[i],BRICK_WIDTH,BRICK_HEIGHT);
+        }
+    }
+}
+
+void livesCounter(){        //Displays how many lives you have remaining
+    //location bottom right corner
+    fill(white);
+    textSize(20);
+    text("Lives : ",600,375);
+    if(lives == 3){
+        makeHeart(680,370);
+        makeHeart(710,370);
+        makeHeart(740,370);
+    }
+    if(lives == 2){
+        makeHeart(680,370);
+        makeHeart(710,370);
+    }
+    if(lives == 1){
+        makeHeart(680,370);
+    }
+}
+
+void startPage(){
+    background(black);
+    fill(white);
+    textSize(40);
+    text("Breakout",330,50);
+    startPageBall();
+    startPagePaddle();
+    fill(gray);
+    rect(350,100,100,25);
+    textSize(20);
+    fill(white);
+    text("start",375,120);
+    
+    if(startPageBallX+10>=width||startPageBallX-10<=0){
+        startPageBallMoveX=-startPageBallMoveX;
+    }
+    if(startPageBallY+10>=height||startPageBallY-10<=0){
+        startPageBallMoveY=-startPageBallMoveY;
+    }
+    if((startPageBallX >= startPageBallX-(PADDLE_WIDTH/2) && (startPageBallX <= startPageBallX+(PADDLE_WIDTH/2)) 
+        && startPageBallY+10 >= height-PADDLE_OFFSET-PADDLE_HEIGHT+2)){
+            startPageBallMoveY = -startPageBallMoveY;
+        }
+    startPageBallX=startPageBallX+startPageBallMoveX;
+    startPageBallY=startPageBallY+startPageBallMoveY;
+}
+
+void gamePage(){
+    background(black);
+    ball();
+    drawPaddle();
+    makeRows();
+    if(helpText){
+        fill(white);
+        textSize(40);
+        text("Press Space To Start",300,250);
+    }
+    
+    //Checking if the ball is hitting a Wall
+    if(ballX+5>=width||ballX-5<=0){
+        
+        disX=-disX;
+    }
+    //Checking if the ball is hitting the Ceiling
+    if(ballY-10<=0){
+        disY=-disY;
+    }
+    //Paddle 
+    
+    //Three Sections
+    //Left
+    if(ballX>= mouseX-(40)&&(ballX<= mouseX-(13))&& (ballY+10 >= height-PADDLE_OFFSET-PADDLE_HEIGHT+2)){
+        disX=-3;
+        disY=-2;
+    }
+    //Middle
+    if(ballX>= mouseX-(13)&&(ballX<= mouseX+(13))&& (ballY+10 >= height-PADDLE_OFFSET-PADDLE_HEIGHT+2)){
+        if(disX>1){
+            disX=3;
+        }else{
+        
+            disX=-3;
+        }
+        disY=-3;
+    }
+    //Right
+    if(ballX>= mouseX+(13)&&(ballX<= mouseX+(39))&& (ballY+10 >= height-PADDLE_OFFSET-PADDLE_HEIGHT+2)){
+        disX=3;
+        disY=-2;
+    }
+    checkBricks();
+    if(ballY+10>=height){
+        loseCondition();
+    }
+    fill(white);
+    textSize(15);
+    text("Score: "+score,50,390);
+    livesCounter();
+    ballX=ballX+disX;
+    ballY=ballY+disY;
+}
+
+void winPage(){
+    background(green);
+    fill(white);
+    textSize(40);
+    text("Congratulations",270,50);
+    
+    fill(gray);
+    rect(0,250,width,150);
+    
+    fill(white);
+    textSize(25);
+    text("Score: "+score,270,300);
+    
+    fill(gray);
+    noStroke();
+    rect(350,100,150,25);
+    textSize(20);
+    fill(white);
+    text("Play Again?",375,120);//score will be consistant
+    
+    fill(gray);
+    rect(350,150,150,25);
+    fill(white);
+    text("Main Menu",375,170);
+}
+
+void losePage(){
+    background(red);
+    fill(white);
+    textSize(40);
+    text("All Lives Lost",270,50);
+    
+    fill(gray);
+    rect(0,250,width,150);
+    
+    fill(white);
+    textSize(25);
+    text("Score: "+score,270,300);
+    
+    fill(gray);
+    noStroke();
+    rect(350,100,150,25);
+    textSize(20);
+    fill(white);
+    text("Play Again?",375,120);//score will be consistant
+    
+    fill(gray);
+    rect(350,150,150,25);
+    fill(white);
+    text("Main Menu",375,170);  
+}
+
+void draw(){
+    if(page==0){
+        startPage();
+    }
+    if(page==1){
+        gamePage(); 
+    }
+    if(page==2){
+        winPage(); 
+    }
+    if(page==3){
+        losePage(); 
+    }
+}
+
